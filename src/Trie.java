@@ -1,5 +1,10 @@
+/**
+ * Class for containing data structure for trie
+ * Contains its root, as well as insert, lookup, and print methods
+ */
 public class Trie {
     private final Prefix root;
+    public static final int ASCII_SIZE = 256;
     public Trie() {
         root = new Prefix();
     }
@@ -13,8 +18,7 @@ public class Trie {
         int length = word.length();
         for (int i = 0; i < length; i++) {
             // Get the current letter
-            char letter = word.charAt(i);
-            int letterIndex = indexShift(letter);
+            int letterIndex = word.charAt(i);
             Prefix[] currentSuffixes = currentPrefix.getSuffixes();
             // If that prefix does not exist in the currentPrefix's children
             // Create new child of that prefix with current letter added
@@ -28,9 +32,9 @@ public class Trie {
         currentPrefix.becomeWord();
     }
     /**
-     * Checks if a given word in the text provided is misspelled based off dictionary of words
+     * Checks if a given word is in the trie of words
      * @param word current word being checked
-     * @return true if the word exists in the dictionary, false otherwise
+     * @return true if the word exists in the trie, false otherwise
      */
     public boolean lookup(String word) {
         Prefix currentPrefix = root;
@@ -39,10 +43,9 @@ public class Trie {
         for (int i = 0; i < word.length(); i++) {
             // Get all the suffixes of the current prefix
             Prefix[] suffixes = currentPrefix.getSuffixes();
-            char letter = word.charAt(i);
-            int letterIndex = indexShift(letter);
-            // If the letter is not part of the alphabet or an apostrophe, returns false (not a word in dictionary)
-            if (letterIndex < 0 || letterIndex > 26) {
+            int letterIndex = (int) word.charAt(i);
+            // If the letter is not part of the ascii code, returns false (not a word in dictionary)
+            if (letterIndex >= ASCII_SIZE) {
                 return false;
             }
             Prefix nextPrefix = suffixes[letterIndex];
@@ -57,24 +60,28 @@ public class Trie {
         // After word has been fully looped through, returns true if the word exists as a word in the dictionary tree
         return currentPrefix.isWord();
     }
-    public void printTrie() {
 
-    }
     /**
-     * given a char, returns it's corresponding index in the alphabet starting from 0; returns 26 if it's an apostrophe
-     * @param letter current letter in the word
-     * @return corresponding index
+     * Prints each word that exists in the trie using postorder
      */
-    public int indexShift(char letter) {
-        // Deal with edge case of apostrophe, set to index 26 in suffixes array
-        int letterIndex;
-        if ((int) letter == 39) {
-            letterIndex = 26;
+    public void printTrie() {
+        traverse(root, "");
+    }
+
+    /**
+     * Helper method for traversing each node in the trie, uses postorder
+     */
+    public void traverse(Prefix root, String prefix) {
+        // Get the node's children, loop through each one at a time
+        Prefix[] children = root.getSuffixes();
+        for (int i = 0; i < ASCII_SIZE; i++) {
+            if (children[i] != null) {
+                traverse(children[i], prefix + (char) i);
+            }
         }
-        else {
-            // Convert the letter to an index between 0 and 25, for each letter in the alphabet
-            letterIndex = letter - 97;
+        // Prints word if it exists
+        if (root.isWord()) {
+            System.out.println(prefix);
         }
-        return letterIndex;
     }
 }
